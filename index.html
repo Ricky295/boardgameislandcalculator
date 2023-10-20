@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+<html>
+<head>
+    <title>Board Game Island Calculator</title>
+    <style>
+        body {
+            background: linear-gradient(45deg, #ff7fff 45px, transparent 45px) 64px 64px,
+                        linear-gradient(45deg, #ff7fff 45px, transparent 45px, transparent 91px, #ff00ff 91px, #ff00ff 135px, transparent 135px),
+                        linear-gradient(-45deg, #ff7fff 23px, transparent 23px, transparent 68px, #ff7fff 68px, #ff7fff 113px, transparent 113px, transparent 158px, #ff7fff 158px);
+            background-color: #ff00ff;
+            background-size: 128px 128px;
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>Board game island calculator</h1>
+    <p>
+        <label for="spacesLeft">Spaces until the end:</label>
+        <input type="number" id="spacesLeft">
+    </p>
+    <p>
+        <label for="minRoll">Minimum roll:</label>
+        <input type="number" id="minRoll">
+        <label for="maxRoll"> - Maximum roll:</label>
+        <input type="number" id="maxRoll" max="30">
+    </p>
+    <p>
+        Win minigames: <input type="checkbox" id="winMinigames">
+    </p>
+    <p>
+        Lucky on dinosaur roll: <input type="checkbox" id="luckyDinosaur">
+    </p>
+    <p>
+        Volcano mode (all cumulative -4): <input type="checkbox" id="volcano">
+    </p>
+    <p>
+        <button onclick="getBestRolls()">Get best rolls!</button>
+    </p>
+    <p>
+        <span id="bestSpaces"></span>
+    </p>
+
+    <script>
+        function getBestRolls() {
+            var spacesCumulativeValue = [0, 5, 0, 0, 0, 0, 0, 0, 0, 6, 0, 4, 10, 0, 0, 0, 4, 0, 0, 0, 0, -4, 0, 0, 0, 10, 18, -8, 16, 0, 0, 10, 5, 0, 0, 0, 6, 7, 0, 0, 0, 5, -18, 10, 0, 10, 0, 6, 7, 0, 5, 0, 4, 0, 0, 0, 0, 6, 7, 0, 0, 4, 0, 0, -4, 0, -8, 0, 0, 0, 0, 0, -4, 0];
+
+            if (!document.getElementById("winMinigames").checked) {
+                spacesCumulativeValue[12] = 0;
+                spacesCumulativeValue[25] = 0;
+                spacesCumulativeValue[37] = 0;
+                spacesCumulativeValue[45] = 0;
+                spacesCumulativeValue[48] = 0;
+                spacesCumulativeValue[58] = 0;
+            }
+
+            if (!document.getElementById("luckyDinosaur").checked) {
+                spacesCumulativeValue[31] = -9;
+                spacesCumulativeValue[43] = -4;
+            }
+
+            if (document.getElementById("volcano").checked) {
+                spacesCumulativeValue[1] = -1;
+                spacesCumulativeValue[9] = -4;
+                spacesCumulativeValue[11] = -4;
+                spacesCumulativeValue[12] = -4;
+                spacesCumulativeValue[15] = -8;
+                spacesCumulativeValue[16] = -8;
+                spacesCumulativeValue[20] = -12;
+                spacesCumulativeValue[21] = -4;
+                spacesCumulativeValue[25] = -8;
+                spacesCumulativeValue[26] = -4;
+                spacesCumulativeValue[27] = -4;
+                spacesCumulativeValue[28] = -4;
+                spacesCumulativeValue[31] = -8;
+                spacesCumulativeValue[32] = -8;
+                spacesCumulativeValue[33] = -4;
+                spacesCumulativeValue[34] = -4;
+                spacesCumulativeValue[36] = -12;
+                spacesCumulativeValue[37] = -8;
+                spacesCumulativeValue[38] = -8;
+                spacesCumulativeValue[41] = -12;
+                spacesCumulativeValue[42] = -12;
+                spacesCumulativeValue[43] = -4;
+                spacesCumulativeValue[45] = -16;
+                spacesCumulativeValue[47] = -8;
+                spacesCumulativeValue[48] = -4;
+                spacesCumulativeValue[50] = -4;
+                spacesCumulativeValue[52] = -8;
+                spacesCumulativeValue[53] = -4;
+                spacesCumulativeValue[57] = -8;
+                spacesCumulativeValue[58] = -4;
+                spacesCumulativeValue[61] = -12;
+                spacesCumulativeValue[63] = -4;
+                spacesCumulativeValue[64] = -4;
+                spacesCumulativeValue[66] = -4;
+                spacesCumulativeValue[67] = -8;
+                spacesCumulativeValue[71] = -12;
+                spacesCumulativeValue[72] = -4;
+            }
+
+            var spacesLeft = parseInt(document.getElementById("spacesLeft").value);
+            var minRoll = parseInt(document.getElementById("minRoll").value);
+            var maxRoll = parseInt(document.getElementById("maxRoll").value);
+
+            var bestSpaces = [];
+
+            for (var roll = minRoll; roll <= maxRoll; roll++) {
+                var space = 73 - spacesLeft + roll;
+                var value = spacesCumulativeValue[space];
+                var value = value + roll;
+
+
+                bestSpaces.push({ space: space, roll: roll, value: value }); // Include the roll value
+            }
+
+            // Sort the best spaces by value from most to least
+            bestSpaces.sort(function (a, b) {
+                return b.value - a.value;
+            });
+
+            // Create an ordered list and add list items for each space
+            var ol = document.createElement("ol");
+            bestSpaces.forEach(function (item) {
+                var li = document.createElement("li");
+                li.textContent = "Space " + item.space + " (Roll: " + item.roll + ") - Value: " + item.value;
+                ol.appendChild(li);
+            });
+
+            var bestSpacesContainer = document.getElementById("bestSpaces");
+            bestSpacesContainer.innerHTML = ""; // Clear any previous content
+            bestSpacesContainer.appendChild(ol);
+        }
+    </script>
+</body>
+</html>
